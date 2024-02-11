@@ -93,8 +93,7 @@ class ProcessFrame:
                                 0: ('BEND BACKWARDS', 215, (0, 153, 255)),
                                 1: ('BEND FORWARD', 215, (0, 153, 255)),
                                 2: ('KNEE FALLING OVER TOE', 170, (255, 80, 80)),
-                                3: ('SQUAT TOO DEEP', 125, (255, 80, 80)),
-                                4: ('EXT ROT', 215, (0, 153, 255))
+                                3: ('SQUAT TOO DEEP', 125, (255, 80, 80))
                                }
 
         
@@ -178,7 +177,7 @@ class ProcessFrame:
 
             offset_angle = find_angle(left_shldr_coord, right_shldr_coord, nose_coord)
 
-            if offset_angle < self.thresholds['OFFSET_THRESH']:
+            if offset_angle > self.thresholds['OFFSET_THRESH']:
                 
                 display_inactivity = False
 
@@ -294,8 +293,6 @@ class ProcessFrame:
                     
 
                 # ------------------- Verical Angle calculation --------------
-                    
-                  
                 
                 hip_vertical_angle = find_angle(shldr_coord, np.array([hip_coord[0], 0]), hip_coord)
                 cv2.ellipse(frame, hip_coord, (30, 30), 
@@ -323,28 +320,16 @@ class ProcessFrame:
 
                 draw_dotted_line(frame, ankle_coord, start=ankle_coord[1]-50, end=ankle_coord[1]+20, line_color=self.COLORS['blue'])
 
-
-                
-                foot_vertical_angle = find_angle(ankle_coord, np.array([foot_coord[0], 0]), foot_coord)
-                cv2.ellipse(frame, ankle_coord, (30, 30),
-                            angle = 0, startAngle = -90, endAngle = -90 + multiplier*foot_vertical_angle,
-                            color = self.COLORS['white'], thickness = 3,  lineType=self.linetype)
-
-                draw_dotted_line(frame, foot_coord, start=foot_coord[1]-50, end=foot_coord[1]+20, line_color=self.COLORS['blue'])
-
                 # ------------------------------------------------------------
-                # Calculate foot ankle distance
-
-                x_distance = abs(foot_coord[0] - ankle_coord[0])
-
+        
                 
                 # Join landmarks.
-                cv2.line(frame, shldr_coord, elbow_coord, self.COLORS['light_blue'], 1, lineType=self.linetype)
-                cv2.line(frame, wrist_coord, elbow_coord, self.COLORS['light_blue'], 1, lineType=self.linetype)
-                cv2.line(frame, shldr_coord, hip_coord, self.COLORS['light_blue'], 1, lineType=self.linetype)
-                cv2.line(frame, knee_coord, hip_coord, self.COLORS['light_blue'], 1,  lineType=self.linetype)
-                cv2.line(frame, ankle_coord, knee_coord,self.COLORS['light_blue'], 1,  lineType=self.linetype)
-                cv2.line(frame, ankle_coord, foot_coord, self.COLORS['light_blue'], 1,  lineType=self.linetype)
+                cv2.line(frame, shldr_coord, elbow_coord, self.COLORS['light_blue'], 4, lineType=self.linetype)
+                cv2.line(frame, wrist_coord, elbow_coord, self.COLORS['light_blue'], 4, lineType=self.linetype)
+                cv2.line(frame, shldr_coord, hip_coord, self.COLORS['light_blue'], 4, lineType=self.linetype)
+                cv2.line(frame, knee_coord, hip_coord, self.COLORS['light_blue'], 4,  lineType=self.linetype)
+                cv2.line(frame, ankle_coord, knee_coord,self.COLORS['light_blue'], 4,  lineType=self.linetype)
+                cv2.line(frame, ankle_coord, foot_coord, self.COLORS['light_blue'], 4,  lineType=self.linetype)
                 
                 # Plot landmark points
                 cv2.circle(frame, shldr_coord, 7, self.COLORS['yellow'], -1,  lineType=self.linetype)
@@ -392,7 +377,6 @@ class ProcessFrame:
                 # -------------------------------------- PERFORM FEEDBACK ACTIONS --------------------------------------
 
                 else:
-
                     if hip_vertical_angle > self.thresholds['HIP_THRESH'][1]:
                         self.state_tracker['DISPLAY_TEXT'][0] = True
                         
@@ -416,12 +400,6 @@ class ProcessFrame:
                     if (ankle_vertical_angle > self.thresholds['ANKLE_THRESH']):
                         self.state_tracker['DISPLAY_TEXT'][2] = True
                         self.state_tracker['INCORRECT_POSTURE'] = True
-
-                    if x_distance > self.thresholds['FOOT_THRESH'][1]:
-                        self.state_tracker['DISPLAY_TEXT'][4] = True
-                        
-
-                    
 
 
                 # ----------------------------------------------------------------------------------------------------
@@ -457,14 +435,13 @@ class ProcessFrame:
                 hip_text_coord_x = hip_coord[0] + 10
                 knee_text_coord_x = knee_coord[0] + 15
                 ankle_text_coord_x = ankle_coord[0] + 10
-                foot_text_coord_x = foot_coord[0] + 10
 
                 if self.flip_frame:
                     frame = cv2.flip(frame, 1)
                     hip_text_coord_x = frame_width - hip_coord[0] + 10
                     knee_text_coord_x = frame_width - knee_coord[0] + 15
                     ankle_text_coord_x = frame_width - ankle_coord[0] + 10
-                    foot_text_coord_x = frame_width - foot_coord[0] + 10
+
                 
                 
                 if 's3' in self.state_tracker['state_seq'] or current_state == 's1':
@@ -486,7 +463,6 @@ class ProcessFrame:
                 cv2.putText(frame, str(int(hip_vertical_angle)), (hip_text_coord_x, hip_coord[1]), self.font, 0.6, self.COLORS['light_green'], 2, lineType=self.linetype)
                 cv2.putText(frame, str(int(knee_vertical_angle)), (knee_text_coord_x, knee_coord[1]+10), self.font, 0.6, self.COLORS['light_green'], 2, lineType=self.linetype)
                 cv2.putText(frame, str(int(ankle_vertical_angle)), (ankle_text_coord_x, ankle_coord[1]), self.font, 0.6, self.COLORS['light_green'], 2, lineType=self.linetype)
-                cv2.putText(frame, str(int(x_distance)), (foot_text_coord_x, foot_coord[1]), self.font, 0.6, self.COLORS['light_green'], 2, lineType=self.linetype)
 
                  
                 draw_text(

@@ -17,11 +17,10 @@ def get_thresholds_beginner():
                     'ANKLE_THRESH' : 45,
                     'KNEE_THRESH'  : [50, 70, 95],
 
-                    'OFFSET_THRESH'    : 65.0,
+                    'OFFSET_THRESH'    : 35.0,
                     'INACTIVE_THRESH'  : 15.0,
 
-                    'CNT_FRAME_THRESH' : 50,
-                    'FOOT_TRESH' : 5
+                    'CNT_FRAME_THRESH' : 50
                             
                 }
 
